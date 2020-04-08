@@ -74,7 +74,7 @@ export default {
 
           }).then(res => {
             window.sessionStorage.setItem('user', res.data.data.token)
-            this.$router.push('/home')
+            this.$router.push('/')
           }).catch(() => {
             this.$message({
               type: 'warning',
