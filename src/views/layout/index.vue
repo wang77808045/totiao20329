@@ -19,8 +19,8 @@
                 <template slot="title">内容管理</template>
                 <el-menu-item index="/publish">发布文章</el-menu-item>
                 <el-menu-item index="/article">内容列表</el-menu-item>
-                <el-menu-item>评论列表</el-menu-item>
-                <el-menu-item>素材管理</el-menu-item>
+                <el-menu-item index="/comment">评论列表</el-menu-item>
+                <el-menu-item index="/media">素材管理</el-menu-item>
             </el-submenu>
             <!-- 二级菜单 -->
             <el-submenu index="2">
@@ -43,7 +43,7 @@
         </el-header>
     <!-- 中部区域 -->
         <el-main>二级容器
-            <router-view></router-view>
+            <router-view :key="$route.path"></router-view>
         </el-main>
     </el-container>
 </el-container>

@@ -18,13 +18,7 @@
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="频道列表">
-                    <el-select placeholder="请选择频道" v-model="filterForm.channel_id">
-                        <el-option label="所有频道" :value="null"></el-option>
-                        <el-option :label="channel.name"
-                                    :value="channel.id"
-                                    v-for="channel in channels"
-                                    :key="channel.id"></el-option>
-                    </el-select>
+                    <channels v-model="filterForm.channel_id" :includeAll="true"></channels>
                 </el-form-item>
                 <el-form-item label="时间选择">
                     <el-date-picker
@@ -32,7 +26,8 @@
                     type="daterange"
                     range-separator="至"
                     start-placeholder="开始时间"
-                    end-placeholder="结束时间">
+                    end-placeholder="结束时间"
+                    value-format="yyyy-MM-dd">
 
                     </el-date-picker>
                 </el-form-item>
@@ -45,7 +40,7 @@
         <!-- //文章列表 -->
         <el-card class="box-card">
             <div slot="header" class="clearfix">
-                <span>共找到59806条符合条件的内容</span>
+                <span>共找到{{totalCount}}条符合条件的内容</span>
             </div>
             <el-table
             :data="articles"
@@ -68,17 +63,19 @@
                 <el-table-column
                     prop="status"
                     label="状态">
-                    <!-- <template slot-scope="scope">
+                    <template slot-scope="scope">
                         <el-tag :type="articleStatus[scope.row.status].type">
                             {{articleStatus[scope.row.status].label}}</el-tag>
-                    </template> -->
+                    </template>
                 </el-table-column>
 
                 <el-table-column
                 prop="pubdate"
                 label="操作">
-                    <el-button type="danger" size="mini">删除</el-button>
-                    <el-button type="primary" size="mini">编辑</el-button>
+                    <template slot-scope="scope">
+                      <el-button type="danger" size="mini" @click="onDelete(scope.row.id)">删除</el-button>
+                      <el-button type="primary" size="mini" @click="$router.push('/publish/'+scope.row.id)">编辑</el-button>
+                    </template>
                 </el-table-column>
             </el-table>
         </el-card>
@@ -94,6 +91,7 @@
 </template>
 
 <script>
+import channels from '@/components/channels'
 export default {
   name: 'Article',
   data () {
@@ -107,35 +105,38 @@ export default {
       },
       rangeDate: '',
       articles: [],
-      articleStatus: [],
-      totalCount: 59806,
+      articleStatus: [{ type: 'warning', label: '草稿' }, { type: '', label: '待审核' }, { type: '', label: '审核通过' }],
+      totalCount: '',
       loading: true,
-      channels: []
+      channels: [],
+      page: 1
     }
+  },
+  components: {
+    channels
   },
   created () {
     this.loadArticles()
-    this.loadChannels()
   },
   methods: {
     loadArticles (page = 1) {
       this.loading = true
-      const token = window.sessionStorage.getItem('user')
       this.$axios({
         method: 'get',
         url: 'articles',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+
         params: {
           page,
           per_page: 10,
           status: this.filterForm.status, // 文章状态
-          channel_id: this.filterForm.channel_id// 频道列表
+          channel_id: this.filterForm.channel_id, // 频道列表
+          begin_pubdate: this.rangeDate ? this.rangeDate[0] : null,
+          end_pubdate: this.rangeDate ? this.rangeDate[1] : null
         }
       }).then(res => {
         this.articles = res.data.data.results
-        console.log(this.articles)
+        console.log(res)
+        this.totalCount = res.data.data.total_count
       }).catch(err => {
         console.log(err, '数据加载失败')
       }).finally(() => {
@@ -144,18 +145,21 @@ export default {
     },
     // 点击页码
     onPageChange (page) {
+      this.page = page
       this.loadArticles(page)
     },
-    // 加载频道列表
-    loadChannels () {
+
+    // 刪除文章
+    onDelete (articleId) {
       this.$axios({
-        method: 'GET',
-        url: '/channels'
+        method: 'DELETE',
+        url: `/articles/${articleId}`
 
       }).then(res => {
-        this.channels = res.data.data.channels
+        this.loadArticles(this.page)
+        this.$message({ message: '删除成功', type: 'success' })
       }).catch(err => {
-        console.log(err, '数据获取失败')
+        console.log(err, '刪除失敗')
       })
     }
   }

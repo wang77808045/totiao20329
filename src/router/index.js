@@ -4,6 +4,11 @@ import Login from '../views/login'
 import Layout from '../views/layout'
 import Home from '@/views/home'
 import Article from '@/views/article'
+import Publish from '@/views/publish'
+import Comment from '@/views/comment'
+import CommentDetail from '@/views/comment-detail'
+import Media from '@/views/media'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -25,6 +30,26 @@ const routes = [
         // 文章列表
         path: '/article',
         component: Article
+      },
+      {
+        path: '/publish/:articleId',
+        component: Publish
+      },
+      {
+        path: '/publish',
+        component: Publish
+      },
+      {
+        path: '/comment',
+        component: Comment
+      },
+      {
+        path: '/comment/:articleId',
+        component: CommentDetail
+      },
+      {
+        path: '/media',
+        component: Media
       }
     ]
   }
