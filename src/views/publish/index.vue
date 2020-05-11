@@ -14,10 +14,28 @@
               <el-form-item label="频道">
                   <channels v-model="article.channel_id" :include-all="false"></channels>
               </el-form-item>
+
+              <el-form-item label="封面">
+                  <el-radio-group v-model="article.cover.type">
+                    <el-radio :label="1">单图</el-radio>
+                    <el-radio :label="3">三图</el-radio>
+                    <el-radio :label="0">无图</el-radio>
+                    <el-radio :label="-1">自动</el-radio>
+                  </el-radio-group>
+                  <template v-if="article.cover.type>0">
+                    <el-row :gutter="20">
+                      <el-col :span="4" v-for="(item,index) in article.cover.type" :key="item">
+                        <UploadImage v-model="article.cover.images[index]"></UploadImage>
+                      </el-col>
+                    </el-row>
+                  </template>
+                </el-form-item>
+
                 <el-form-item>
                     <el-button type="primary" @click="onSubmit(false)">发表</el-button>
                     <el-button @click="onSubmit(true)">存入草稿</el-button>
                 </el-form-item>
+
           </el-form>
       </el-card>
   </div>
@@ -31,6 +49,8 @@ import 'quill/dist/quill.bubble.css'
 // 引入富文本编辑器的核心组件
 import { quillEditor } from 'vue-quill-editor'
 import channels from '../../components/channels'
+
+import UploadImage from '../../components/upload-image'
 export default {
   name: 'publishArticle',
   data () {
@@ -51,7 +71,8 @@ export default {
   components: {
     // 注册组件
     quillEditor,
-    channels: channels
+    channels: channels,
+    UploadImage
   },
   created () {
     if (this.$route.params.articleId) {
